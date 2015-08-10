@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 
 	"code.google.com/p/portaudio-go/portaudio"
@@ -19,18 +20,34 @@ func newSine(sinezChan chan *stereoSine) {
 }
 
 func newStereoSine(freqL, freqR, sampleRate float64) *stereoSine {
-	s := &stereoSine{nil, 0, freqL / sampleRate, 0, freqR / sampleRate, 0}
+	s := &stereoSine{nil, 0, 0.8, freqL / sampleRate, 0, freqR / sampleRate, 0}
 	var err error
 	s.Stream, err = portaudio.OpenDefaultStream(0, 2, sampleRate, 0, s.processAudio)
 	chk(err)
 	return s
 }
 
+func (g *stereoSine) set(property string, val float64) {
+	fmt.Println("Setting ", property, " to ", val)
+	switch property {
+	case "vol":
+		fmt.Println("CHAnging VOL to", val)
+		g.vol = float32(val)
+	case "freq":
+		fmt.Println("CHAnging FREQ to", val)
+		g.stepL = val / sampleRate
+		g.stepR = val / sampleRate
+	default:
+		fmt.Println("SMOKE WEED EVERYDAYAYAYY")
+	}
+}
+
 func (g *stereoSine) processAudio(out [][]float32) {
 	for i := range out[0] {
-		out[0][i] = float32(math.Sin(2 * math.Pi * g.phaseL * (g.time / 190)))
+		// fmt.Println("FREQ ", g.stepL, g.stepR)
+		out[0][i] = g.vol * float32(math.Sin(2*math.Pi*g.phaseL*(g.time/190)))
 		_, g.phaseL = math.Modf(g.phaseL + g.stepL)
-		out[1][i] = float32(math.Sin(2 * math.Pi * g.phaseR * (g.time / 190)))
+		out[1][i] = g.vol * float32(math.Sin(2*math.Pi*g.phaseR*(g.time/190)))
 		_, g.phaseR = math.Modf(g.phaseR + g.stepR)
 		g.time++
 	}
