@@ -37,6 +37,17 @@ func main() {
 		}
 		input = strings.TrimSpace(input)
 
+		bpmre := regexp.MustCompile("^bpm +([0-9]+)$")
+		br := bpmre.FindStringSubmatch(input)
+		if len(br) == 2 {
+			bpmval, err := strconv.ParseFloat(br[1], 64)
+			if err != nil {
+				fmt.Println("Choked on your Beats Per Minute, mate..")
+				continue
+			}
+			bpm = bpmval
+		}
+
 		s, _ := regexp.MatchString("^sine$", input)
 		if s {
 			fmt.Println("Sine o' the times, mate...")

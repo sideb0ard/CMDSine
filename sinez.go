@@ -49,9 +49,9 @@ func (g *stereoSine) set(property string, val float64) {
 func (g *stereoSine) processAudio(out [][]float32) {
 	for i := range out[0] {
 		// fmt.Println("FREQ ", g.stepL, g.stepR)
-		out[0][i] = g.vol * float32(math.Sin(2*math.Pi*g.phaseL*(g.time/190)))
+		out[0][i] = g.vol * float32(math.Sin(2*math.Pi*g.phaseL*(g.time/bpm)))
 		_, g.phaseL = math.Modf(g.phaseL + g.freqL)
-		out[1][i] = g.vol * float32(math.Sin(2*math.Pi*g.phaseR*(g.time/190)))
+		out[1][i] = g.vol * float32(math.Sin(2*math.Pi*g.phaseR*(g.time/bpm)))
 		_, g.phaseR = math.Modf(g.phaseR + g.freqR)
 		g.time++
 	}
