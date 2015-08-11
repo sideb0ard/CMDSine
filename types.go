@@ -15,3 +15,8 @@ type stereoSine struct {
 	freqR  float64
 	phaseR float64
 }
+
+type FM struct {
+	car stereoSine // carrier
+	mod stereoSine // modulator
+}
