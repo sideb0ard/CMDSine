@@ -8,11 +8,15 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/mgutz/ansi"
+
 	"code.google.com/p/portaudio-go/portaudio"
 )
 
 func main() {
 	//cmds := []string{"ls", "exit", "jobbie"}
+
+	PS2 := ansi.Color("#CMDSine> ", "magenta")
 
 	sinezChan := make(chan *stereoSine)
 	sinez := make([]*stereoSine, 0)
@@ -22,7 +26,7 @@ func main() {
 
 	shellReader := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Printf("<CMDzine#> ")
+		fmt.Printf(PS2)
 		input, err := shellReader.ReadString('\n')
 		if err != nil {
 			if err.Error() == "EOF" {
@@ -33,12 +37,24 @@ func main() {
 		}
 		input = strings.TrimSpace(input)
 
-		a, _ := regexp.MatchString("^sine$", input)
-		if a {
+		s, _ := regexp.MatchString("^sine$", input)
+		if s {
 			fmt.Println("Sine o' the times, mate...")
-			go newSine(sinezChan)
+			go newSine(sinezChan, 440)
 			sinez = append(sinez, <-sinezChan)
 		}
+		re := regexp.MustCompile("^sine +([0-9]+)$")
+		sf := re.FindStringSubmatch(input)
+		if len(sf) == 2 {
+			freq, err := strconv.ParseFloat(sf[1], 64)
+			if err != nil {
+				fmt.Println("Choked on your sine freq, mate..")
+				continue
+			}
+			go newSine(sinezChan, freq)
+			sinez = append(sinez, <-sinezChan)
+		}
+
 		b, _ := regexp.MatchString("^sines$", input)
 		if b {
 			sineInfo(sinez)
@@ -49,6 +65,21 @@ func main() {
 			setSineProperty(input, sinez)
 		}
 
+		d, _ := regexp.MatchString("^ssh$", input)
+		if d {
+			for _, s := range sinez {
+				s.set("vol", 0)
+			}
+		}
+
+		e, _ := regexp.MatchString("^stop$", input)
+		if e {
+			for _, s := range sinez {
+				s.Stop()
+				//s.Close()
+			}
+			sinez = sinez[:0]
+		}
 		//case input.MatchString("sine"):
 		//case "sines":
 		//case input.MatchString("sine"):
@@ -70,10 +101,7 @@ func main() {
 }
 
 func setSineProperty(inputString string, sinez []*stereoSine) {
-	fmt.Println("BAERF - SET SINE PROPEZ", inputString, sinez)
 	stringieBits := strings.Split(inputString, " ")
-	fmt.Println("BAERF - SET SINE PROPEZ", inputString, stringieBits)
-	fmt.Println("LEN SINEZ ", len(stringieBits))
 	if len(stringieBits) != 4 {
 		fmt.Println("Chancer")
 		return
@@ -90,7 +118,7 @@ func setSineProperty(inputString string, sinez []*stereoSine) {
 		return
 	}
 	if sineToSet < len(sinez) {
-		fmt.Printf("Changing Sine[%d] - %s -- %d\n", sineToSet, propToSet, valToSet)
+		fmt.Printf("Changing Sine[%d]\n", sineToSet)
 		sinez[sineToSet].set(propToSet, valToSet)
 	} else {
 		fmt.Println("Chancer")
@@ -101,7 +129,7 @@ func setSineProperty(inputString string, sinez []*stereoSine) {
 
 func sineInfo(sinez []*stereoSine) {
 
-	fmt.Println("Sinezzzzzz", sinez)
+	fmt.Println("Sinezzzzzz::")
 	for i, d := range sinez {
 		fmt.Println("Sine ", i, d)
 	}

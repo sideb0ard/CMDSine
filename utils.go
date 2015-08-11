@@ -3,7 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/mgutz/ansi"
 )
+
+var lime = ansi.ColorCode("green+h:black")
+var reset = ansi.ColorCode("reset")
 
 func chk(err error) {
 	if err != nil {
