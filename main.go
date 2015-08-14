@@ -71,12 +71,29 @@ func main() {
 			sineInfo(sinez)
 		}
 
+		fmre := regexp.MustCompile("^fm +([0-9]+) +([0-9]+)$")
+		fmfz := fmre.FindStringSubmatch(input)
+		fmt.Println("GOt THIS: ", len(fmfz))
+		if len(fmfz) == 3 {
+			mfreq, err := strconv.ParseFloat(fmfz[1], 64)
+			if err != nil {
+				fmt.Println("Choked on your MOD freq, mate..")
+				continue
+			}
+			cfreq, err := strconv.ParseFloat(fmfz[2], 64)
+			if err != nil {
+				fmt.Println("Choked on your CAR freq, mate..")
+				continue
+			}
+			go newFM(cfreq, mfreq)
+			//sinez = append(sinez, <-sinezChan)
+		}
 		c, _ := regexp.MatchString("^set ", input)
 		if c {
 			setSineProperty(input, sinez)
 		}
 
-		d, _ := regexp.MatchString("^ssh$", input)
+		d, _ := regexp.MatchString("^sssh$", input)
 		if d {
 			for _, s := range sinez {
 				s.set("vol", 0)
