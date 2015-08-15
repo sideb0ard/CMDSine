@@ -8,19 +8,19 @@ import (
 
 const (
 	sampleRate = 44100
-	freqRad    = math.Pi * 2 / sampleRate
+	twoPi      = math.Pi * 2
+	freqRad    = twoPi / sampleRate
 )
 
 var bpm float64 = 120
 
 type stereoSine struct {
 	*portaudio.Stream
-	time   float64 // counter
-	vol    float32
-	freqL  float64
-	phaseL float64
-	freqR  float64
-	phaseR float64
+	time      float64 // counter
+	vol       float32
+	freq      float64
+	phase     float64
+	phaseIncr float64
 }
 
 type FM struct {
