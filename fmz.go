@@ -1,18 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"math"
 
 	"code.google.com/p/portaudio-go/portaudio"
 )
 
-func newFM(carFreq, modFreq float64) {
+func newFM(fmChan chan *FM, carFreq, modFreq float64) {
 	forevs := make(chan bool)
 	fm := newFMz(carFreq, modFreq, sampleRate)
 	defer fm.Close()
 	chk(fm.Start())
 	defer fm.Stop()
-	// chan ?
+	fmChan <- fm
 	<-forevs
 }
 
@@ -24,9 +25,12 @@ func newFMz(carFreq, modFreq, sampleRate float64) *FM {
 	return fm
 }
 
+func (fm *FM) String() string {
+	return fmt.Sprintf("FM:: CarFreq : %.2f // ModFreq: %.2f", fm.carFreq, fm.modFreq)
+}
+
 func (fm *FM) processAudio(out [][]float32) {
 	for i := range out[0] {
-		// fmt.Println("FREQ ", g.stepL, g.stepR)
 		out[0][i] = float32(math.Sin(fm.carPhase * (fm.time / bpm)))
 		out[1][i] = float32(math.Sin(fm.carPhase * (fm.time / bpm)))
 		fm.modFreq = fm.modAmp * math.Sin(fm.modPhase)

@@ -21,6 +21,9 @@ func main() {
 	sinezChan := make(chan *stereoSine)
 	sinez := make([]*stereoSine, 0)
 
+	fmChan := make(chan *FM)
+	fmz := make([]*FM, 0)
+
 	portaudio.Initialize()
 	defer portaudio.Terminate()
 
@@ -48,6 +51,7 @@ func main() {
 			bpm = bpmval
 		}
 
+		// SINEZ
 		s, _ := regexp.MatchString("^sine$", input)
 		if s {
 			fmt.Println("Sine o' the times, mate...")
@@ -71,6 +75,7 @@ func main() {
 			sineInfo(sinez)
 		}
 
+		// FMZ
 		fmre := regexp.MustCompile("^fm +([0-9]+) +([0-9]+)$")
 		fmfz := fmre.FindStringSubmatch(input)
 		fmt.Println("GOt THIS: ", len(fmfz))
@@ -85,9 +90,15 @@ func main() {
 				fmt.Println("Choked on your CAR freq, mate..")
 				continue
 			}
-			go newFM(cfreq, mfreq)
-			//sinez = append(sinez, <-sinezChan)
+			go newFM(fmChan, cfreq, mfreq)
+			fmz = append(fmz, <-fmChan)
 		}
+		fmx, _ := regexp.MatchString("^fms$", input)
+		if fmx {
+			fmInfo(fmz)
+		}
+
+		// CH-ch-changes
 		c, _ := regexp.MatchString("^set ", input)
 		if c {
 			setSineProperty(input, sinez)
@@ -160,5 +171,12 @@ func sineInfo(sinez []*stereoSine) {
 	fmt.Println("Sinezzzzzz::")
 	for i, d := range sinez {
 		fmt.Println("Sine ", i, d)
+	}
+}
+func fmInfo(fmz []*FM) {
+
+	fmt.Println("FMZ::")
+	for i, d := range fmz {
+		fmt.Println("FM ", i, d)
 	}
 }

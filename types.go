@@ -8,7 +8,7 @@ import (
 
 const (
 	sampleRate = 44100
-	freqRad    = math.Pi * 2 * sampleRate
+	freqRad    = math.Pi * 2 / sampleRate
 )
 
 var bpm float64 = 120
