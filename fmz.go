@@ -30,9 +30,12 @@ func (fm *FM) String() string {
 }
 
 func (fm *FM) processAudio(out [][]float32) {
+	fm.modAmp = freqRad * 100
 	for i := range out[0] {
-		out[0][i] = float32(math.Sin(fm.carPhase * (fm.time / bpm)))
-		out[1][i] = float32(math.Sin(fm.carPhase * (fm.time / bpm)))
+		// out[0][i] = float32(math.Sin(fm.carPhase * (fm.time / bpm)))
+		// out[1][i] = float32(math.Sin(fm.carPhase * (fm.time / bpm)))
+		out[0][i] = float32(math.Sin(fm.carPhase * float64(sumNum)))
+		out[1][i] = float32(math.Sin(fm.carPhase * float64(sumNum)))
 		fm.modFreq = fm.modAmp * math.Sin(fm.modPhase)
 		fm.carPhase = fm.carIncr + fm.modFreq
 		fm.modPhase += fm.modIncr

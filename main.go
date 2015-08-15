@@ -24,6 +24,10 @@ func main() {
 	fmChan := make(chan *FM)
 	fmz := make([]*FM, 0)
 
+	tickerChan := make(chan int)
+	go ticker(tickerChan)
+	go fib(tickerChan)
+
 	portaudio.Initialize()
 	defer portaudio.Terminate()
 

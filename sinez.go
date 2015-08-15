@@ -71,8 +71,10 @@ func (g *stereoSine) processAudio(out [][]float32) {
 		// out[0][i] = g.vol * float32(value/scale*g.time/bpm)
 		// out[1][i] = g.vol * float32(value/scale*g.time/bpm)
 
-		out[0][i] = g.vol * float32(math.Sin(g.phase*(g.time/bpm)))
-		out[1][i] = g.vol * float32(math.Sin(g.phase*(g.time/bpm)))
+		//out[0][i] = g.vol * float32(math.Sin(g.phase*(g.time/bpm)))
+		//out[1][i] = g.vol * float32(math.Sin(g.phase*(g.time/bpm)))
+		out[0][i] = g.vol * float32(math.Sin(g.phase*bpm))
+		out[1][i] = g.vol * float32(math.Sin(g.phase*bpm))
 		g.phase = g.phase + g.phaseIncr
 
 		// simple sine

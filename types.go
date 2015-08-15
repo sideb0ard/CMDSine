@@ -13,6 +13,7 @@ const (
 )
 
 var bpm float64 = 120
+var sumNum int = 0
 
 type stereoSine struct {
 	*portaudio.Stream
