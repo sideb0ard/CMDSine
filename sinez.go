@@ -20,7 +20,7 @@ func newSine(sinezChan chan *stereoSine, freq float64) {
 }
 
 func newStereoSine(freq float64) *stereoSine {
-	s := &stereoSine{nil, 0, 0.6, freq, 0, freq * freqRad}
+	s := &stereoSine{sine: &signalGenerator{amp: 0.6, freq: freq, phase: 0, phaseIncr: freq * freqRad}}
 	var err error
 	s.Stream, err = portaudio.OpenDefaultStream(0, 2, sampleRate, 0, s.processAudio)
 	chk(err)
@@ -28,7 +28,7 @@ func newStereoSine(freq float64) *stereoSine {
 }
 
 func (g *stereoSine) String() string {
-	return fmt.Sprintf("SINE:: Vol: %.2f // Freq: %d Hz", g.vol, int(g.freq))
+	return fmt.Sprintf("SINE:: Vol: %.2f // Freq: %d Hz", g.sine.amp, int(g.sine.freq))
 }
 
 func (g *stereoSine) set(property string, val float64) {
@@ -36,10 +36,10 @@ func (g *stereoSine) set(property string, val float64) {
 	switch property {
 	case "vol":
 		fmt.Println("CHAnging VOL to", val)
-		g.vol = float32(val)
+		g.sine.amp = float64(val)
 	case "freq":
 		fmt.Println("CHAnging FREQ to", val)
-		g.freq = val
+		g.sine.freq = val
 	default:
 		fmt.Println("SMOKE WEED EVERYDAYAYAYY")
 	}
@@ -73,16 +73,16 @@ func (g *stereoSine) processAudio(out [][]float32) {
 
 		//out[0][i] = g.vol * float32(math.Sin(g.phase*(g.time/bpm)))
 		//out[1][i] = g.vol * float32(math.Sin(g.phase*(g.time/bpm)))
-		out[0][i] = g.vol * float32(math.Sin(g.phase*bpm))
-		out[1][i] = g.vol * float32(math.Sin(g.phase*bpm))
-		g.phase = g.phase + g.phaseIncr
+		out[0][i] = float32(g.sine.amp * math.Sin(g.sine.phase*bpm))
+		out[1][i] = float32(g.sine.amp * math.Sin(g.sine.phase*bpm))
+		g.sine.phase = g.sine.phase + g.sine.phaseIncr
 
 		// simple sine
 		//out[0][i] = g.vol * float32(math.Sin(g.phase))
 		//out[1][i] = g.vol * float32(math.Sin(g.phase))
 		//g.phase = g.phase + g.phaseIncr
-		if g.phase >= twoPi {
-			g.phase -= twoPi
+		if g.sine.phase >= twoPi {
+			g.sine.phase -= twoPi
 		}
 
 		// sawtooth

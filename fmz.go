@@ -18,7 +18,8 @@ func newFM(fmChan chan *FM, carFreq, modFreq float64) {
 }
 
 func newFMz(carFreq, modFreq, sampleRate float64) *FM {
-	fm := &FM{nil, 0, carFreq, freqRad * carFreq, 0, 0.6, modFreq, freqRad * modFreq, 0, 0.6}
+	fm := &FM{car: &signalGenerator{amp: 0.6, freq: carFreq, phase: 0, phaseIncr: freqRad * carFreq},
+		mod: &signalGenerator{amp: 0.6, freq: modFreq, phase: 0, phaseIncr: freqRad * modFreq}}
 	var err error
 	fm.Stream, err = portaudio.OpenDefaultStream(0, 2, sampleRate, 0, fm.processAudio)
 	chk(err)
@@ -26,19 +27,19 @@ func newFMz(carFreq, modFreq, sampleRate float64) *FM {
 }
 
 func (fm *FM) String() string {
-	return fmt.Sprintf("FM:: CarFreq : %.2f // ModFreq: %.2f", fm.carFreq, fm.modFreq)
+	return fmt.Sprintf("FM:: CarFreq : %.2f // ModFreq: %.2f", fm.car.freq, fm.mod.freq)
 }
 
 func (fm *FM) processAudio(out [][]float32) {
-	fm.modAmp = freqRad * 100
+	fm.mod.amp = freqRad * 100
 	for i := range out[0] {
 		// out[0][i] = float32(math.Sin(fm.carPhase * (fm.time / bpm)))
 		// out[1][i] = float32(math.Sin(fm.carPhase * (fm.time / bpm)))
-		out[0][i] = float32(math.Sin(fm.carPhase * float64(sumNum)))
-		out[1][i] = float32(math.Sin(fm.carPhase * float64(sumNum)))
-		fm.modFreq = fm.modAmp * math.Sin(fm.modPhase)
-		fm.carPhase = fm.carIncr + fm.modFreq
-		fm.modPhase += fm.modIncr
+		out[0][i] = float32(math.Sin(fm.car.phase * float64(sumNum*int(bpm))))
+		out[1][i] = float32(math.Sin(fm.car.phase * float64(sumNum*int(bpm))))
+		fm.mod.freq = fm.mod.amp * math.Sin(fm.mod.phase)
+		fm.car.phase = fm.car.phaseIncr + fm.mod.freq
+		fm.mod.phase += fm.mod.phaseIncr
 		fm.time++
 	}
 }

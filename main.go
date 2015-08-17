@@ -59,8 +59,9 @@ func main() {
 		s, _ := regexp.MatchString("^sine$", input)
 		if s {
 			fmt.Println("Sine o' the times, mate...")
-			go newSine(sinezChan, 440)
+			go newSine(sinezChan, 440) // default
 			sinez = append(sinez, <-sinezChan)
+
 		}
 		re := regexp.MustCompile("^sine +([0-9]+)$")
 		sf := re.FindStringSubmatch(input)
@@ -74,15 +75,9 @@ func main() {
 			sinez = append(sinez, <-sinezChan)
 		}
 
-		b, _ := regexp.MatchString("^sines$", input)
-		if b {
-			sineInfo(sinez)
-		}
-
 		// FMZ
 		fmre := regexp.MustCompile("^fm +([0-9]+) +([0-9]+)$")
 		fmfz := fmre.FindStringSubmatch(input)
-		fmt.Println("GOt THIS: ", len(fmfz))
 		if len(fmfz) == 3 {
 			mfreq, err := strconv.ParseFloat(fmfz[1], 64)
 			if err != nil {
@@ -97,9 +92,14 @@ func main() {
 			go newFM(fmChan, cfreq, mfreq)
 			fmz = append(fmz, <-fmChan)
 		}
-		fmx, _ := regexp.MatchString("^fms$", input)
-		if fmx {
+
+		// PROCESSES ps list
+		psx, _ := regexp.MatchString("^ps$", input)
+		if psx {
+			fmt.Println()
 			fmInfo(fmz)
+			fmt.Println()
+			sineInfo(sinez)
 		}
 
 		// CH-ch-changes
@@ -122,6 +122,12 @@ func main() {
 				//s.Close()
 			}
 			sinez = sinez[:0]
+
+			for _, f := range fmz {
+				f.Stop()
+				//s.Close()
+			}
+			fmz = fmz[:0]
 		}
 		//case input.MatchString("sine"):
 		//case "sines":
@@ -177,6 +183,7 @@ func sineInfo(sinez []*stereoSine) {
 		fmt.Println("Sine ", i, d)
 	}
 }
+
 func fmInfo(fmz []*FM) {
 
 	fmt.Println("FMZ::")
