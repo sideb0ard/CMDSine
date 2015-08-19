@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -31,8 +32,16 @@ func main() {
 	portaudio.Initialize()
 	defer portaudio.Terminate()
 
+	// Check GOMAXPROCS
+	max_procs := runtime.GOMAXPROCS(-1)
+	num_procs_to_set := runtime.NumCPU()
+	if max_procs != num_procs_to_set {
+		runtime.GOMAXPROCS(num_procs_to_set)
+	}
+
 	shellReader := bufio.NewReader(os.Stdin)
 	for {
+		// SETUP && LOOP
 		fmt.Printf(PS2)
 		input, err := shellReader.ReadString('\n')
 		if err != nil {
@@ -44,6 +53,15 @@ func main() {
 		}
 		input = strings.TrimSpace(input)
 
+		// ALL DA REGEX FROM HERE ON OUT..
+
+		// SET OFF PRIME TRACK
+		prx, _ := regexp.MatchString("^prime$", input)
+		if prx {
+			go primez(sinezChan, &sinez)
+		}
+
+		// SET BPM
 		bpmre := regexp.MustCompile("^bpm +([0-9]+)$")
 		br := bpmre.FindStringSubmatch(input)
 		if len(br) == 2 {
@@ -55,7 +73,7 @@ func main() {
 			bpm = bpmval
 		}
 
-		// SINEZ
+		// CREATE SINE (w/ DEFAULT 440)
 		s, _ := regexp.MatchString("^sine$", input)
 		if s {
 			fmt.Println("Sine o' the times, mate...")
@@ -63,6 +81,7 @@ func main() {
 			sinez = append(sinez, <-sinezChan)
 
 		}
+		// CREATE SINE w/ FREQ
 		re := regexp.MustCompile("^sine +([0-9]+)$")
 		sf := re.FindStringSubmatch(input)
 		if len(sf) == 2 {
@@ -75,25 +94,25 @@ func main() {
 			sinez = append(sinez, <-sinezChan)
 		}
 
-		// FMZ
+		// CREATE FREQUENCY MODULATOR
 		fmre := regexp.MustCompile("^fm +([0-9]+) +([0-9]+)$")
 		fmfz := fmre.FindStringSubmatch(input)
 		if len(fmfz) == 3 {
-			mfreq, err := strconv.ParseFloat(fmfz[1], 64)
-			if err != nil {
-				fmt.Println("Choked on your MOD freq, mate..")
-				continue
-			}
-			cfreq, err := strconv.ParseFloat(fmfz[2], 64)
+			cfreq, err := strconv.ParseFloat(fmfz[1], 64)
 			if err != nil {
 				fmt.Println("Choked on your CAR freq, mate..")
+				continue
+			}
+			mfreq, err := strconv.ParseFloat(fmfz[2], 64)
+			if err != nil {
+				fmt.Println("Choked on your MOD freq, mate..")
 				continue
 			}
 			go newFM(fmChan, cfreq, mfreq)
 			fmz = append(fmz, <-fmChan)
 		}
 
-		// PROCESSES ps list
+		// PROCESS LIST
 		psx, _ := regexp.MatchString("^ps$", input)
 		if psx {
 			fmt.Println()
@@ -102,12 +121,13 @@ func main() {
 			sineInfo(sinez)
 		}
 
-		// CH-ch-changes
+		// CHANGE A SINE ATTRIBUTE
 		c, _ := regexp.MatchString("^set ", input)
 		if c {
 			setSineProperty(input, sinez)
 		}
 
+		// BE QUIET ALL YOU SINEZ
 		d, _ := regexp.MatchString("^sssh$", input)
 		if d {
 			for _, s := range sinez {
@@ -115,6 +135,7 @@ func main() {
 			}
 		}
 
+		// EVERYBODY STOP!!
 		e, _ := regexp.MatchString("^stop$", input)
 		if e {
 			for _, s := range sinez {
@@ -129,23 +150,6 @@ func main() {
 			}
 			fmz = fmz[:0]
 		}
-		//case input.MatchString("sine"):
-		//case "sines":
-		//case input.MatchString("sine"):
-		//case "set *":
-		//	setSineProperty(input)
-		//case "exit":
-		//	myexit()
-		//case "help":
-		//	help()
-		//case "jobbie":
-		//	fmt.Println("smellybum")
-		//case "":
-		//	continue
-		//default:
-		//	fmt.Println("I DONT UNDERSTAND YOU HUMAN")
-		//	help()
-		//}
 	}
 }
 

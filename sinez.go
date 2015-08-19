@@ -3,11 +3,10 @@ package main
 import (
 	"fmt"
 	"math"
+	"time"
 
 	"code.google.com/p/portaudio-go/portaudio"
 )
-
-//var sinez []*stereoSine
 
 func newSine(sinezChan chan *stereoSine, freq float64) {
 	forever := make(chan bool)
@@ -20,7 +19,7 @@ func newSine(sinezChan chan *stereoSine, freq float64) {
 }
 
 func newStereoSine(freq float64) *stereoSine {
-	s := &stereoSine{sine: &signalGenerator{amp: 0.6, freq: freq, phase: 0, phaseIncr: freq * freqRad}}
+	s := &stereoSine{sine: &oscillator{vol: 1, freq: freq, phase: 0, phaseIncr: freq * freqRad}}
 	var err error
 	s.Stream, err = portaudio.OpenDefaultStream(0, 2, sampleRate, 0, s.processAudio)
 	chk(err)
@@ -28,7 +27,21 @@ func newStereoSine(freq float64) *stereoSine {
 }
 
 func (g *stereoSine) String() string {
-	return fmt.Sprintf("SINE:: Vol: %.2f // Freq: %d Hz", g.sine.amp, int(g.sine.freq))
+	return fmt.Sprintf("SINE:: Vol: %.2f // Freq: %d Hz", g.sine.vol, int(g.sine.freq))
+}
+
+func (g *stereoSine) SilentStop() {
+	curVol := g.sine.vol
+	for {
+		if curVol > 0.2 {
+			timer := time.NewTimer(time.Duration(300) * time.Millisecond)
+			g.sine.vol -= 0.2
+			<-timer.C
+		}
+
+		g.Close()
+		return
+	}
 }
 
 func (g *stereoSine) set(property string, val float64) {
@@ -36,7 +49,7 @@ func (g *stereoSine) set(property string, val float64) {
 	switch property {
 	case "vol":
 		fmt.Println("CHAnging VOL to", val)
-		g.sine.amp = float64(val)
+		g.sine.vol = float64(val)
 	case "freq":
 		fmt.Println("CHAnging FREQ to", val)
 		g.sine.freq = val
@@ -73,14 +86,14 @@ func (g *stereoSine) processAudio(out [][]float32) {
 
 		//out[0][i] = g.vol * float32(math.Sin(g.phase*(g.time/bpm)))
 		//out[1][i] = g.vol * float32(math.Sin(g.phase*(g.time/bpm)))
-		out[0][i] = float32(g.sine.amp * math.Sin(g.sine.phase*bpm))
-		out[1][i] = float32(g.sine.amp * math.Sin(g.sine.phase*bpm))
-		g.sine.phase = g.sine.phase + g.sine.phaseIncr
+		//out[0][i] = float32(g.sine.amp * math.Sin(g.sine.phase*bpm))
+		//out[1][i] = float32(g.sine.amp * math.Sin(g.sine.phase*bpm))
+		//g.sine.phase = g.sine.phase + g.sine.phaseIncr
 
 		// simple sine
-		//out[0][i] = g.vol * float32(math.Sin(g.phase))
-		//out[1][i] = g.vol * float32(math.Sin(g.phase))
-		//g.phase = g.phase + g.phaseIncr
+		out[0][i] = float32(g.sine.vol * math.Sin(g.sine.phase))
+		out[1][i] = float32(g.sine.vol * math.Sin(g.sine.phase))
+		g.sine.phase += g.sine.phaseIncr
 		if g.sine.phase >= twoPi {
 			g.sine.phase -= twoPi
 		}
