@@ -22,15 +22,7 @@ type oscillator struct {
 	phaseIncr float64
 }
 
-type stereoSine struct {
+type mixer struct {
 	*portaudio.Stream
-	time float64 // counter
-	sine *oscillator
-}
-
-type FM struct {
-	*portaudio.Stream
-	time float64 // counter
-	car  *oscillator
-	mod  *oscillator
+	signals []*oscillator
 }

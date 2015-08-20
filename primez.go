@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func primez(sinezChan chan *stereoSine, sinez *[]*stereoSine) {
+func primez(signalChan chan *oscillator) {
 
 	tic := make(chan int)
 
@@ -24,12 +24,13 @@ func primez(sinezChan chan *stereoSine, sinez *[]*stereoSine) {
 		467, 479, 487, 491}
 
 	// ADDITIVE
-	go gen(sinezChan, sinez, tic, 3, highprimez)
-	go gen(sinezChan, sinez, tic, 11, bassprimez)
-	go gen(sinezChan, sinez, tic, 7, midprimez)
+	go gen(signalChan, tic, 3, highprimez)
+	go gen(signalChan, tic, 11, bassprimez)
+	go gen(signalChan, tic, 7, midprimez)
+	go firstSig(signalChan, midprimez)
 
 	// REMOVITIVE
-	go rem(sinez, 5)
+	// go rem(sinez, 5)
 
 	tickLength := 60000 / bpm
 	tickCounter := 1
@@ -45,7 +46,14 @@ func primez(sinezChan chan *stereoSine, sinez *[]*stereoSine) {
 
 }
 
-func gen(sinezChan chan *stereoSine, sinez *[]*stereoSine, tic chan int, primeTicker int, primeRange []int) {
+func firstSig(signalChan chan *oscillator, primeRange []int) {
+	rand.Seed(4)
+	randyFreq := primeRange[rand.Intn(len(primeRange))]
+	// fmt.Printf("Innnnniiiit!", randyFreq)
+	newSine(signalChan, float64(randyFreq))
+}
+
+func gen(signalChan chan *oscillator, tic chan int, primeTicker int, primeRange []int) {
 
 	var nom int
 	rand.Seed(42)
@@ -54,27 +62,25 @@ func gen(sinezChan chan *stereoSine, sinez *[]*stereoSine, tic chan int, primeTi
 		if nom%primeTicker == 0 {
 			randyFreq := primeRange[rand.Intn(len(primeRange))]
 			fmt.Printf("OOH[%d] -> got one: %d - choosing freq %d\n", primeTicker, nom, randyFreq)
-			go newSine(sinezChan, float64(randyFreq))
-			*sinez = append(*sinez, <-sinezChan)
-
+			newSine(signalChan, float64(randyFreq))
 		}
 	}
 
 }
 
-func rem(sinez *[]*stereoSine, primeTicker int) {
-	rand.Seed(477)
-	for {
-		fmt.Println("LEN(SINEZ)", len(*sinez))
-		timer := time.NewTimer(time.Duration(500) * time.Millisecond)
-
-		if len(*sinez) > primeTicker {
-			sineNumToRemove := rand.Intn(len(*sinez))
-			randyRemoval := (*sinez)[sineNumToRemove]
-			fmt.Println("Oooh, gonna silence sine ", randyRemoval)
-			randyRemoval.SilentStop()
-			*sinez = append((*sinez)[sineNumToRemove:], (*sinez)[sineNumToRemove+1:]...)
-		}
-		<-timer.C
-	}
-}
+// func rem(sinez *[]*stereoSine, primeTicker int) {
+// 	rand.Seed(477)
+// 	for {
+// 		fmt.Println("LEN(SINEZ)", len(*sinez))
+// 		timer := time.NewTimer(time.Duration(500) * time.Millisecond)
+//
+// 		if len(*sinez) > primeTicker {
+// 			sineNumToRemove := rand.Intn(len(*sinez))
+// 			randyRemoval := (*sinez)[sineNumToRemove]
+// 			fmt.Println("Oooh, gonna silence sine ", randyRemoval)
+// 			randyRemoval.SilentStop()
+// 			*sinez = append((*sinez)[sineNumToRemove:], (*sinez)[sineNumToRemove+1:]...)
+// 		}
+// 		<-timer.C
+// 	}
+// }
