@@ -21,14 +21,15 @@ func main() {
 
 	signalChan := make(chan *oscillator)
 
-	tickerChan := make(chan int)
-	go ticker(tickerChan)
-	go fib(tickerChan)
+	tickChan := make(chan int)
+	go ticker(tickChan)
+	// go fib(tickerChan)
 
 	portaudio.Initialize()
 	defer portaudio.Terminate()
 
-	go mixingDesk(signalChan)
+	m := newMixer()
+	go m.mix(signalChan)
 
 	// Check GOMAXPROCS
 	max_procs := runtime.GOMAXPROCS(-1)
@@ -56,7 +57,7 @@ func main() {
 		// SET OFF PRIME TRACK
 		prx, _ := regexp.MatchString("^prime$", input)
 		if prx {
-			go primez(signalChan)
+			go primez(signalChan, tickChan)
 		}
 
 		// SET BPM
@@ -83,10 +84,41 @@ func main() {
 			newSine(signalChan, freq)
 		}
 
+		// SET SINE ATTRIB
+		ssx := regexp.MustCompile("^set sine ([0-9]) ([a-z]+) (0\\.[0-9])$")
+		//ssx := regexp.MustCompile("^set sine ([0-9]) ([a-z]+)$")
+		//ssx := regexp.MustCompile("^set sine ([0-9]) ([a-z]+)$")
+		ssxf := ssx.FindStringSubmatch(input)
+		if len(ssxf) == 4 {
+			sineNum, err := strconv.Atoi(ssxf[1])
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			val, err := strconv.ParseFloat(ssxf[3], 64)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			if sineNum < len(m.signals) {
+				fmt.Println("ooh, got something..", ssxf)
+				m.signals[sineNum].amplitude.attack = val
+
+			}
+		}
+		// 	freq, err := strconv.ParseFloat(sf[1], 64)
+		// 	if err != nil {
+		// 		fmt.Println("Choked on your sine freq, mate..")
+		// 		continue
+		// 	}
+		// 	newSine(signalChan, freq)
+		// }
+
 		// PROCESS LIST
 		psx, _ := regexp.MatchString("^ps$", input)
 		if psx {
 			fmt.Println()
+			m.listChans()
 			//fmInfo(fmz)
 			fmt.Println()
 			//sineInfo(sinez)

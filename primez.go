@@ -3,12 +3,11 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"time"
 )
 
-func primez(signalChan chan *oscillator) {
+func primez(signalChan chan *oscillator, tickChan chan int) {
 
-	tic := make(chan int)
+	forever := make(chan bool)
 
 	bassprimez := []int{53, 59, 61, 67, 71, 73, 79, 83, 89, 97}
 
@@ -24,25 +23,12 @@ func primez(signalChan chan *oscillator) {
 		467, 479, 487, 491}
 
 	// ADDITIVE
-	go gen(signalChan, tic, 3, highprimez)
-	go gen(signalChan, tic, 11, bassprimez)
-	go gen(signalChan, tic, 7, midprimez)
-	go firstSig(signalChan, midprimez)
+	go gen(signalChan, tickChan, 3, highprimez)
+	go gen(signalChan, tickChan, 11, bassprimez)
+	go gen(signalChan, tickChan, 7, midprimez)
+	go firstSig(signalChan, bassprimez)
 
-	// REMOVITIVE
-	// go rem(sinez, 5)
-
-	tickLength := 60000 / bpm
-	tickCounter := 1
-	for {
-		if bpm != 0 {
-			tickLength = 60000 / bpm
-		}
-		timer := time.NewTimer(time.Duration(tickLength) * time.Millisecond)
-		tic <- tickCounter
-		tickCounter++
-		<-timer.C
-	}
+	<-forever
 
 }
 

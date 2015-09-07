@@ -20,6 +20,15 @@ type oscillator struct {
 	freq      float64
 	phase     float64
 	phaseIncr float64
+
+	amplitude envelope
+}
+
+type envelope struct {
+	attack    float64
+	sustain   float64
+	decay     float64
+	increment float64
 }
 
 type mixer struct {
