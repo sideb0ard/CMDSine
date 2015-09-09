@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"reflect"
 
 	"github.com/mgutz/ansi"
 )
@@ -33,4 +34,16 @@ func help() {
 func myexit() {
 	fmt.Println("Later, dude...")
 	os.Exit(0)
+}
+
+func attribs(m interface{}) (listOfAttribs []string) {
+	typ := reflect.TypeOf(m)
+	if typ.Kind() != reflect.Struct {
+		fmt.Println("Oooft, cannae dae that, mate")
+		return listOfAttribs
+	}
+	for i := 0; i < typ.NumField(); i++ {
+		listOfAttribs = append(listOfAttribs, typ.Field(i).Name)
+	}
+	return listOfAttribs
 }

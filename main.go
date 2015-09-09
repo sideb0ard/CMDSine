@@ -85,9 +85,7 @@ func main() {
 		}
 
 		// SET SINE ATTRIB
-		ssx := regexp.MustCompile("^set sine ([0-9]) ([a-z]+) (0\\.[0-9])$")
-		//ssx := regexp.MustCompile("^set sine ([0-9]) ([a-z]+)$")
-		//ssx := regexp.MustCompile("^set sine ([0-9]) ([a-z]+)$")
+		ssx := regexp.MustCompile("^set sine ([0-9]) ([a-z]+) ([0-9\\.]+)$")
 		ssxf := ssx.FindStringSubmatch(input)
 		if len(ssxf) == 4 {
 			sineNum, err := strconv.Atoi(ssxf[1])
@@ -95,33 +93,23 @@ func main() {
 				fmt.Println(err)
 				continue
 			}
+			attrib := ssxf[2]
 			val, err := strconv.ParseFloat(ssxf[3], 64)
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
 			if sineNum < len(m.signals) {
-				fmt.Println("ooh, got something..", ssxf)
-				m.signals[sineNum].amplitude.attack = val
-
+				m.signals[sineNum].set(attrib, val)
 			}
 		}
-		// 	freq, err := strconv.ParseFloat(sf[1], 64)
-		// 	if err != nil {
-		// 		fmt.Println("Choked on your sine freq, mate..")
-		// 		continue
-		// 	}
-		// 	newSine(signalChan, freq)
-		// }
 
 		// PROCESS LIST
 		psx, _ := regexp.MatchString("^ps$", input)
 		if psx {
-			fmt.Println()
+			fmt.Printf("///CMDSine:: bpm: %.0f \\\\\\\n", bpm)
 			m.listChans()
-			//fmInfo(fmz)
 			fmt.Println()
-			//sineInfo(sinez)
 		}
 	}
 }

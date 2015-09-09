@@ -13,15 +13,15 @@ const (
 )
 
 var bpm float64 = 94
+var tickCounter = 1
 var sumNum int = 0
 
 type oscillator struct {
-	vol       float64
-	freq      float64
-	phase     float64
-	phaseIncr float64
+	vol   float64
+	freq  float64
+	phase float64
 
-	amplitude envelope
+	amplitude *envelope
 }
 
 type envelope struct {
