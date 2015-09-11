@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 
 	"code.google.com/p/portaudio-go/portaudio"
 )
@@ -35,12 +36,32 @@ func (m *mixer) listChans() {
 
 func (m *mixer) processAudio(out [][]float32) {
 
+	loopLength := 60000 / bpm / 60 * 16 // loop is 16 beats
 	for i := range out[0] {
 		outval := float32(0)
+		curPosition := math.Mod(float64(tickCounter), loopLength)
 		for _, s := range m.signals {
-			outval += s.genNextSine()
+			ns := s.genNextSine()
+			if s.amplitude.attack > 0 {
+				attackFinish := loopLength * s.amplitude.attack
+				decayStart := loopLength * 0.8
+				if curPosition < attackFinish || curPosition > decayStart {
+					//outval += float32(curPosition*attackFinish) * ns
+					//fmt.Println("cur:", curPosition, "attackFinish:", attackFinish, "loopLength", loopLength)
+					//fmt.Println("VOL SHOULD BE", curPosition/attackFinish)
+					adjustment := float32(curPosition / attackFinish)
+					if adjustment == 0 {
+						fmt.Println("OFFT, MULTIPLY BY ZERO!")
+					}
+					outval += adjustment * ns
+					//fmt.Println("TICK", tickCounter%int(loopLength), "LOOPLENGTH", loopLength)
+				} else {
+					outval += ns
+				}
+			} else {
+				outval += ns
+			}
 		}
-		// fmt.Println(outval)
 		out[0][i] = outval
 		out[1][i] = outval
 	}

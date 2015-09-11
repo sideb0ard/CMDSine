@@ -1,9 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"math/rand"
-)
+import "math/rand"
 
 func primez(signalChan chan *oscillator, tickChan chan int) {
 
@@ -47,7 +44,7 @@ func gen(signalChan chan *oscillator, tic chan int, primeTicker int, primeRange 
 		nom = <-tic
 		if nom%primeTicker == 0 {
 			randyFreq := primeRange[rand.Intn(len(primeRange))]
-			fmt.Printf("OOH[%d] -> got one: %d - choosing freq %d\n", primeTicker, nom, randyFreq)
+			//fmt.Printf("OOH[%d] -> got one: %d - choosing freq %d\n", primeTicker, nom, randyFreq)
 			newSine(signalChan, float64(randyFreq))
 		}
 	}

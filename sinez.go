@@ -45,27 +45,28 @@ func (o *oscillator) set(property string, val float64) {
 }
 
 func (o *oscillator) genNextSine() float32 {
-	vol := float64(0)
+	//vol := float64(0)
 	phaseIncr := o.freq * freqRad
 	o.phase += phaseIncr
 	if o.phase >= twoPi {
 		o.phase -= twoPi
 	}
 
+	// SOLUTION :: NEED TO APPLY ATTACK OVER BPM - NOT OVER EACH TINY CYCLE
 	//fmt.Println("O.PHASE", o.phase)
-	if o.amplitude.attack > 0 {
-		//fmt.Println(vol)
-		if o.phase < (twoPi * o.amplitude.attack) {
-			// current location as percentage of the space between 0 and amp attack * vol
-			//vol = o.vol * o.phase / (twoPi * o.amplitude.attack)
-			vol = 0 * o.phase / (twoPi * o.amplitude.attack)
-		} else {
-			vol = o.vol
-		}
-		// fmt.Println(vol)
-	} else {
-		vol = o.vol
-	}
+	// if o.amplitude.attack > 0 {
+	// 	//fmt.Println(vol)
+	// 	if o.phase < (twoPi * o.amplitude.attack) {
+	// 		// current location as percentage of the space between 0 and amp attack * vol
+	// 		//vol = o.vol * o.phase / (twoPi * o.amplitude.attack)
+	// 		vol = 0 * o.phase / (twoPi * o.amplitude.attack)
+	// 	} else {
+	// 		vol = o.vol
+	// 	}
+	// 	// fmt.Println(vol)
+	// } else {
+	// 	vol = o.vol
+	// }
 
-	return float32(vol * math.Sin(o.phase))
+	return float32(o.vol * math.Sin(o.phase))
 }

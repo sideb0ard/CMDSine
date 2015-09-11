@@ -20,6 +20,7 @@ type oscillator struct {
 	vol   float64
 	freq  float64
 	phase float64
+	clock float64
 
 	amplitude *envelope
 }
