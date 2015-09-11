@@ -7,7 +7,7 @@ import (
 )
 
 func newSine(signalChan chan *oscillator, freq float64) {
-	s := &oscillator{vol: 0.6, freq: freq, phase: 0, amplitude: &envelope{attack: 0}}
+	s := &oscillator{vol: 0.6, freq: freq, phase: 0, amplitude: &envelope{attack: 0.1}}
 	signalChan <- s
 }
 
