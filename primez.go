@@ -19,7 +19,6 @@ func primez(signalChan chan *oscillator, tickChan chan int) {
 		419, 421, 431, 433, 439, 443, 449, 457, 461, 463,
 		467, 479, 487, 491}
 
-	// ADDITIVE
 	go gen(signalChan, tickChan, 3, highprimez)
 	go gen(signalChan, tickChan, 11, bassprimez)
 	go gen(signalChan, tickChan, 7, midprimez)

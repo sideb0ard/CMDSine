@@ -37,7 +37,6 @@ func (m *mixer) listChans() {
 func (m *mixer) processAudio(out [][]float32) {
 
 	loopLength := 60000 / bpm / 60 * 16 // loop is 16 beats
-	//loopLength := 60000 / bpm * 4
 	for i := range out[0] {
 		outval := float32(0)
 		curPosition := math.Mod(float64(tickCounter), loopLength)
@@ -47,21 +46,10 @@ func (m *mixer) processAudio(out [][]float32) {
 				attackFinish := loopLength * s.amplitude.attack
 				decayStart := loopLength * 0.8
 				if curPosition < attackFinish {
-					//outval += float32(curPosition*attackFinish) * ns
-					//fmt.Println("cur:", curPosition, "attackFinish:", attackFinish, "loopLength", loopLength)
-					//fmt.Println("VOL SHOULD BE", curPosition/attackFinish)
 					adjustment := float32(curPosition / attackFinish)
-					if adjustment > 1 || adjustment < -1 {
-						fmt.Println("OFFT, ADJUSTMENT GREATER THAN ONE!")
-					}
 					outval += adjustment * ns
-					//fmt.Println("TICK", tickCounter%int(loopLength), "LOOPLENGTH", loopLength)
 				} else if curPosition > decayStart {
 					adjustment := float32((loopLength - curPosition) / (loopLength - decayStart))
-					//adjustment := float32(decayStart / curPosition)
-					if adjustment > 1 || adjustment < -1 {
-						fmt.Println("OFFT, DECAY ADJUSTMENT GREATER THAN ONE!")
-					}
 					outval += adjustment * ns
 				} else {
 					outval += ns
@@ -71,7 +59,7 @@ func (m *mixer) processAudio(out [][]float32) {
 			}
 		}
 		outval = outval / float32(len(m.signals))
-		if outval > 1 || outval < -1 {
+		if outval < -1 || outval > 1 {
 			fmt.Println("Oot", outval)
 		}
 		out[0][i] = outval
