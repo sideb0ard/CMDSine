@@ -3,11 +3,15 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
+
+	"net/http"
+	_ "net/http/pprof"
 
 	"github.com/mgutz/ansi"
 
@@ -30,6 +34,10 @@ func main() {
 
 	m := newMixer()
 	go m.mix(signalChan)
+
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	// Check GOMAXPROCS
 	max_procs := runtime.GOMAXPROCS(-1)

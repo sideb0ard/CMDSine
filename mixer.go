@@ -37,9 +37,10 @@ func (m *mixer) listChans() {
 func (m *mixer) processAudio(out [][]float32) {
 
 	loopLength := 60000 / bpm / 60 * 16 // loop is 16 beats
+	curPosition := math.Mod(float64(tickCounter), loopLength)
+
 	for i := range out[0] {
 		outval := float32(0)
-		curPosition := math.Mod(float64(tickCounter), loopLength)
 		for _, s := range m.signals {
 			ns := s.genNextSine()
 			if s.amplitude.attack > 0 {

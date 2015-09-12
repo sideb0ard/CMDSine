@@ -10,17 +10,17 @@ func ticker(tickChan chan int) {
 
 	for {
 		if bpm != 0 {
-			tickLength = (60000 / bpm) / 60
+			tickLength = (60000 / bpm) / 60 // 60 Microticks per second
 		}
 		timer := time.NewTimer(time.Duration(tickLength) * time.Millisecond)
 
 		// this is used for Prime Sub
-		//if tickCounter%60 == 0 {
-		tic++
-		//}
-		select {
-		case tickChan <- tic:
-		default:
+		if tickCounter%60 == 0 {
+			tic++
+			select {
+			case tickChan <- tic:
+			default:
+			}
 		}
 
 		tickCounter++
