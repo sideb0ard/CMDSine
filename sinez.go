@@ -18,7 +18,7 @@ func (o *oscillator) String() string {
 func (o *oscillator) SilentStop() {
 	curVol := o.vol
 	for {
-		if curVol > 0.2 {
+		if curVol > 0 {
 			timer := time.NewTimer(time.Duration(300) * time.Millisecond)
 			o.vol -= 0.2
 			<-timer.C

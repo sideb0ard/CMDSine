@@ -21,8 +21,12 @@ func (m *mixer) mix(signalChan chan *oscillator) {
 	defer m.Stop()
 	for s := range signalChan {
 		if len(m.signals) > 5 {
-			//m.signals[0].SilentStop()
-			m.signals = m.signals[3:]
+			//go func() { fmt.Println("yar!") }() // s m.signals[0]) { s.SilentStop() }
+			go func(m *mixer) {
+				fmt.Println("SILENCIO!")
+				m.signals[0].SilentStop()
+				m.signals = m.signals[1:]
+			}(m) // s m.signals[0]) { s.SilentStop() }
 		}
 		m.signals = append(m.signals, s)
 	}
