@@ -31,38 +31,17 @@ func primez(signalChan chan *oscillator, tickChan chan int) {
 func firstSig(signalChan chan *oscillator, primeRange []int) {
 	rand.Seed(4)
 	randyFreq := primeRange[rand.Intn(len(primeRange))]
-	// fmt.Printf("Innnnniiiit!", randyFreq)
 	newSine(signalChan, float64(randyFreq))
 }
 
 func gen(signalChan chan *oscillator, tic chan int, primeTicker int, primeRange []int) {
-
 	var nom int
 	rand.Seed(42)
 	for {
 		nom = <-tic
 		if nom%primeTicker == 0 {
 			randyFreq := primeRange[rand.Intn(len(primeRange))]
-			//fmt.Printf("OOH[%d] -> got one: %d - choosing freq %d\n", primeTicker, nom, randyFreq)
 			newSine(signalChan, float64(randyFreq))
 		}
 	}
-
 }
-
-// func rem(sinez *[]*stereoSine, primeTicker int) {
-// 	rand.Seed(477)
-// 	for {
-// 		fmt.Println("LEN(SINEZ)", len(*sinez))
-// 		timer := time.NewTimer(time.Duration(500) * time.Millisecond)
-//
-// 		if len(*sinez) > primeTicker {
-// 			sineNumToRemove := rand.Intn(len(*sinez))
-// 			randyRemoval := (*sinez)[sineNumToRemove]
-// 			fmt.Println("Oooh, gonna silence sine ", randyRemoval)
-// 			randyRemoval.SilentStop()
-// 			*sinez = append((*sinez)[sineNumToRemove:], (*sinez)[sineNumToRemove+1:]...)
-// 		}
-// 		<-timer.C
-// 	}
-// }

@@ -12,9 +12,12 @@ const (
 	freqRad    = twoPi / sampleRate
 )
 
-var bpm float64 = 94
+var bpm float64 = 47
 var tickCounter = 1
+var tic = 1 // used for Prime Sub
 var sumNum int = 0
+var tickLength = 60000 / bpm / 60
+var loopLength = tickLength * 16 // loop is 16 beats
 
 type oscillator struct {
 	vol   float64

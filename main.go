@@ -2,23 +2,25 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
 
-	"net/http"
-	_ "net/http/pprof"
-
 	"github.com/mgutz/ansi"
 
 	"code.google.com/p/portaudio-go/portaudio"
 )
 
+var pflag = flag.Bool("primez", false, "Play Primez rather than interactive")
+
 func main() {
+	flag.Parse()
 	//cmds := []string{"ls", "exit", "jobbie"}
 
 	PS2 := ansi.Color("#CMDSine> ", "magenta")
@@ -44,6 +46,13 @@ func main() {
 	num_procs_to_set := runtime.NumCPU()
 	if max_procs != num_procs_to_set {
 		runtime.GOMAXPROCS(num_procs_to_set)
+	}
+
+	// non-interactive - running Prime loop
+	if *pflag == true {
+		forevs := make(chan bool)
+		go primez(signalChan, tickChan)
+		<-forevs
 	}
 
 	shellReader := bufio.NewReader(os.Stdin)
@@ -78,6 +87,8 @@ func main() {
 				continue
 			}
 			bpm = bpmval
+			tickLength = 60000 / bpm / 60
+			loopLength = tickLength * 16
 		}
 
 		// CREATE SINE w/ FREQ

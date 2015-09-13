@@ -40,33 +40,38 @@ func (m *mixer) listChans() {
 
 func (m *mixer) processAudio(out [][]float32) {
 
-	loopLength := 60000 / bpm / 60 * 16 // loop is 16 beats
 	curPosition := math.Mod(float64(tickCounter), loopLength)
+	// attackFinish := loopLength * s.amplitude.attack
+	attackFinish := loopLength * 0.2
+	decayStart := loopLength * 0.8
+	attack_adjustment := float32(curPosition / attackFinish)
+	decay_adjustment := float32((loopLength - curPosition) / (loopLength - decayStart))
 
 	for i := range out[0] {
+
 		outval := float32(0)
 		for _, s := range m.signals {
+
 			ns := s.genNextSine()
+
 			if s.amplitude.attack > 0 {
-				attackFinish := loopLength * s.amplitude.attack
-				decayStart := loopLength * 0.8
 				if curPosition < attackFinish {
-					adjustment := float32(curPosition / attackFinish)
-					outval += adjustment * ns
+					outval += attack_adjustment * ns
 				} else if curPosition > decayStart {
-					adjustment := float32((loopLength - curPosition) / (loopLength - decayStart))
-					outval += adjustment * ns
+					outval += decay_adjustment * ns
 				} else {
 					outval += ns
 				}
 			} else {
 				outval += ns
 			}
+
 		}
 		outval = outval / float32(len(m.signals))
 		if outval < -1 || outval > 1 {
 			fmt.Println("Oot", outval)
 		}
+
 		out[0][i] = outval
 		out[1][i] = outval
 	}

@@ -19,8 +19,8 @@ func (o *oscillator) SilentStop() {
 	curVol := o.vol
 	for {
 		if curVol > 0 {
-			timer := time.NewTimer(time.Duration(300) * time.Millisecond)
-			o.vol -= 0.2
+			timer := time.NewTimer(time.Duration(400) * time.Millisecond)
+			o.vol -= 0.1
 			<-timer.C
 		}
 		return
