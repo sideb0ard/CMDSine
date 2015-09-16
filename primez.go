@@ -2,7 +2,7 @@ package main
 
 import "math/rand"
 
-func primez(signalChan chan *oscillator, tickChan chan int) {
+func primez(signalChan chan SoundGen, tickChan chan int) {
 
 	forever := make(chan bool)
 
@@ -28,13 +28,13 @@ func primez(signalChan chan *oscillator, tickChan chan int) {
 
 }
 
-func firstSig(signalChan chan *oscillator, primeRange []int) {
+func firstSig(signalChan chan SoundGen, primeRange []int) {
 	rand.Seed(4)
 	randyFreq := primeRange[rand.Intn(len(primeRange))]
 	newSine(signalChan, float64(randyFreq))
 }
 
-func gen(signalChan chan *oscillator, tic chan int, primeTicker int, primeRange []int) {
+func gen(signalChan chan SoundGen, tic chan int, primeTicker int, primeRange []int) {
 	var nom int
 	rand.Seed(42)
 	for {

@@ -25,7 +25,7 @@ func main() {
 
 	PS2 := ansi.Color("#CMDSine> ", "magenta")
 
-	signalChan := make(chan *oscillator)
+	signalChan := make(chan SoundGen)
 
 	tickChan := make(chan int)
 	go ticker(tickChan)
@@ -104,23 +104,42 @@ func main() {
 		}
 
 		// SET SINE ATTRIB
-		ssx := regexp.MustCompile("^set sine ([0-9]) ([a-z]+) ([0-9\\.]+)$")
-		ssxf := ssx.FindStringSubmatch(input)
-		if len(ssxf) == 4 {
-			sineNum, err := strconv.Atoi(ssxf[1])
+		// ssx := regexp.MustCompile("^set sine ([0-9]) ([a-z]+) ([0-9\\.]+)$")
+		// ssxf := ssx.FindStringSubmatch(input)
+		// if len(ssxf) == 4 {
+		// 	sineNum, err := strconv.Atoi(ssxf[1])
+		// 	if err != nil {
+		// 		fmt.Println(err)
+		// 		continue
+		// 	}
+		// 	attrib := ssxf[2]
+		// 	val, err := strconv.ParseFloat(ssxf[3], 64)
+		// 	if err != nil {
+		// 		fmt.Println(err)
+		// 		continue
+		// 	}
+		// 	if sineNum < len(m.signals) {
+		// 		m.signals[sineNum].set(attrib, val)
+		// 	}
+		// }
+
+		// CREATE FREQMOD
+		fmx := regexp.MustCompile("^fm +([0-9]+) +([0-9]+)$")
+		fmxr := fmx.FindStringSubmatch(input)
+		// if len(fmxr) == 2 {
+		if len(fmxr) > 1 {
+			fmt.Println("New FM!")
+			car, err := strconv.ParseFloat(fmxr[1], 64)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println("Choked on your carrier freq, mate..")
 				continue
 			}
-			attrib := ssxf[2]
-			val, err := strconv.ParseFloat(ssxf[3], 64)
+			mod, err := strconv.ParseFloat(fmxr[2], 64)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println("Choked on your modulator freq, mate..")
 				continue
 			}
-			if sineNum < len(m.signals) {
-				m.signals[sineNum].set(attrib, val)
-			}
+			newFM(signalChan, car, mod)
 		}
 
 		// PROCESS LIST

@@ -20,12 +20,19 @@ var tickLength = 60000 / bpm / 60
 var loopLength = tickLength * 16 // loop is 16 beats
 
 type oscillator struct {
-	vol   float64
-	freq  float64
-	phase float64
-	clock float64
+	vol       float64
+	freq      float64
+	phase     float64
+	phaseIncr float64
+	clock     float64
 
 	amplitude *envelope
+}
+
+type freqMod struct {
+	carrier   *oscillator
+	modulator *oscillator
+	modAmp    float64
 }
 
 type envelope struct {
@@ -37,5 +44,9 @@ type envelope struct {
 
 type mixer struct {
 	*portaudio.Stream
-	signals []*oscillator
+	signals []SoundGen
+}
+
+type SoundGen interface {
+	genNextSound() float32
 }
